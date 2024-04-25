@@ -1,0 +1,64 @@
+import os
+
+SHOW = 0
+STATION_ID = "AMSXXX"
+LOCATION = ""
+NETWORK_STATIONS = []
+
+AMS_HOME = os.getenv("AMS_HOME", default=os.getcwd() + "/../ams")
+CONF_DIR = AMS_HOME + "/conf"
+ARC_DIR = AMS_HOME + "/meteor_archive/" + STATION_ID + "/"
+METEOR_DIR = AMS_HOME + "/meteors/"
+METEOR_ARC_DIR = "/ams/meteor_archive/" + STATION_ID + "/METEOR/"
+CLOUD_DIR = "/ams/archive.allsky.tv/" + STATION_ID + "/"
+CLOUD_METEOR_DIR = CLOUD_DIR + "METEOR/"
+CLOUD_CAL_DIR = CLOUD_DIR + "CAL/"
+
+LIVE_MIN_DIR = ARC_DIR + "LIVE/BROADCAST/"
+
+DATA_BASE_DIR = "/ams"
+PROC_BASE_DIR = "/ams/SD/proc2"
+PREVIEW_W = 300
+PREVIEW_H = 169
+SD_W = 704
+SD_H = 576
+HD_W = 1920
+HD_H = 1080
+HDM_X = 1920 / SD_W 
+HDM_Y = 1080 / SD_H
+# HD scale pix is .072 degrees per px
+PX_SCALE = .072  # for HD
+
+THUMB_W = 320
+THUMB_H = 180
+MEDIUM_W = 640
+MEDIUM_H = 360
+HIGH_W = 1280
+HIGH_H = 720
+
+#DEFAULT FONTS
+VIDEO_FONT = "/home/petter/Projects/ams/amscams/dist/fonts/Roboto_Condensed/RobotoCondensed-Regular.ttf"
+VIDEO_FONT_BOLD = "/home/petter/Projects/ams/amscams/dist/fonts/Roboto_Condensed/RobotoCondensed-Bold.ttf"
+VIDEO_FONT_SIZE = 25
+VIDEO_FONT_SMALL_SIZE = 16 # For Radiant
+VIDEO_LINE_HEIGHT = 0
+VIDEO_FONT_SMALL_COLOR = (250,250,209,255) # For Radiant
+
+# TIME LAPSE
+TL_DIR = ARC_DIR + "TIME_LAPSE/" 
+#5 1 2
+#3 6 4
+
+MULTI_CAM_LAYOUT = [ "010005", "010001", "010002", "010003", "010006", "010004"]
+
+
+MASK_DIR = "/home/petter/ams/meteor_archive/" + STATION_ID + "/CAL/MASKS/"
+TL_IMAGE_DIR = "/home/petter/ams/meteor_archive/" + STATION_ID + "/TL/PICS/"
+TL_VIDEO_DIR = "/home/petter/ams/meteor_archive/" + STATION_ID + "/TL/VIDS/"
+
+
+BK_MNT_PT = "/tmp/backup/"
+BK_DEV = "192.168.1.21:/as6_data"
+BK_UUID = ""
+BK_DIR = "/tmp/backup/ams2/"
+
