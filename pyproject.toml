@@ -1,0 +1,24 @@
+[project]
+name = "amscams"
+version = "0.1.0"
+dependencies = [
+  "opencv-python",
+  "numpy",
+  "ephem",
+  "Pillow",
+  "matplotlib",
+  "requests",
+  "simplejson",
+  "scipy",
+  "photutils",
+  "tqdm",
+  "prettytable",
+  "PySimpleGUI",
+  "scikit-learn",
+  "scikit-image",
+  "suntime",
+  "pytz",
+  "redis",
+  "boto3",
+  "sympy",
+]
