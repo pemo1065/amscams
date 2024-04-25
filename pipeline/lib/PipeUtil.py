@@ -444,6 +444,7 @@ def make_meteor_dir(sd_video_file, json_conf):
    return(meteor_dir)
 
 def cfe(file,dir = 0):
+   print("Looking for file:", file)
    if dir == 0:
       file_exists = Path(file)
       if file_exists.is_file() is True:

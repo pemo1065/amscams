@@ -80,10 +80,10 @@ def find_constant_column(filepath):
     return False, None
 
 def rm_corrupt_cal():
-    ccheck_file = "/mnt/ams2/cal/ccheck.json"
-    base_dir = "/mnt/ams2/cal/freecal/"
-    extra_dir = "/mnt/ams2/cal/extracal/"
-    bad_dir = "/mnt/ams2/cal/bad_cals/"
+    ccheck_file = AMS_HOME + "/cal/ccheck.json"
+    base_dir = AMS_HOME + "/cal/freecal/"
+    extra_dir = AMS_HOME + "/cal/extracal/"
+    bad_dir = AMS_HOME + "/cal/bad_cals/"
     if os.path.exists(ccheck_file) is True:
         column_checks = load_json_file(ccheck_file)
     else:
@@ -144,10 +144,10 @@ def rm_corrupt_cal():
         save_json_file(ccheck_file, column_checks)
 
 def retry_astrometry(cam_id, limit=25):
-    source_dir = "/mnt/ams2/cal/extracal"
+    source_dir = AMS_HOME + "/cal/extracal"
     # scan source dir for subdirs, then each of those for stacked pngs. Copy those to the
     # autocal dir
-    calib_in_dir = "/mnt/ams2/meteor_archive/" + station_id + "/CAL/AUTOCAL/" 
+    calib_in_dir = AMS_HOME + "/meteor_archive/" + station_id + "/CAL/AUTOCAL/" 
     files = sorted(os.listdir(source_dir), reverse=True)
     l = 0
     #    _, thresh_block = cv2.threshold(block, threshold_value, 255, cv2.THRESH_BINARY)
@@ -282,7 +282,7 @@ def rowwise_adaptive_threshold(image_path, in_image=None, block_ratio=0.1, thres
     return(thresholded_image, image,sub,inverted_image)
 
 def fix_lens_nans():
-    files = glob.glob("/mnt/ams2/cal/*poly*")
+    files = glob.glob(AMS_HOME + "/cal/*poly*")
     poly_checks = ['x_poly', 'y_poly', 'x_poly_fwd', 'y_poly_fwd']
     for f in files:
         el = f.split("/")[-1].split("-")
@@ -356,13 +356,13 @@ def rescue_cal(cam_id, con, cur, json_conf):
    # only do this for 2 images per month max
    cal_file_dict = {}
    station_id = json_conf['site']['ams_id']
-   auto_cal_dir = "/mnt/ams2/meteor_archive/" + station_id + "/CAL/AUTOCAL/"
-   free_cal_dir = "/mnt/ams2/cal/freecal/"
+   auto_cal_dir = AMS_HOME + "/meteor_archive/" + station_id + "/CAL/AUTOCAL/"
+   free_cal_dir = AMS_HOME + "/cal/freecal/"
    dirs = []
    print("AUTO", auto_cal_dir) 
    contents = os.listdir(auto_cal_dir)
-   all_extra_cals = os.listdir("/mnt/ams2/cal/extracal/")
-   all_free_cals = os.listdir("/mnt/ams2/cal/freecal/")
+   all_extra_cals = os.listdir(AMS_HOME + "/cal/extracal/")
+   all_free_cals = os.listdir(AMS_HOME + "/cal/freecal/")
    extra_cals = []
    free_cals = []
    for x in all_extra_cals:
@@ -584,7 +584,7 @@ def remote_cal(cal_file, con, cur):
    else:
       # this must be a local cal file from a local AS7 Station
       cal_root = cal_file.split("-")[0]
-      cal_dir = "/mnt/ams2/cal/freecal/" + cal_root + "/"
+      cal_dir = AMS_HOME + "/cal/freecal/" + cal_root + "/"
       (meteor_datetime, cam, f_date_str,fy,fmon,fd, fh, fm, fs) = convert_filename_to_date_cam(cal_file)
 
       # suppport more than 1 way
@@ -1227,7 +1227,7 @@ def man_cal(local_json_file, oimg, station_id, cal_fn, cal_params):
 def get_close_calib_files(cal_file):
    (meteor_datetime, cam, f_date_str,fy,fmon,fd, fh, fm, fs) = convert_filename_to_date_cam(cal_file)
    close_files = []
-   calindex_file = "/mnt/ams2/cal/freecal_index.json"
+   calindex_file = AMS_HOME + "/cal/freecal_index.json"
    #print("get_close_calib_files:", cal_file)
    if os.path.exists(calindex_file) is True:
       try:
@@ -1293,11 +1293,11 @@ def cal_health(con, cur, json_conf, cam_num=None):
    fix_lens_nans()
 
    cam_num = cam_num.upper()
-   autocal_dir = "/mnt/ams2/cal/" 
+   autocal_dir = AMS_HOME + "/cal/" 
    station_id = json_conf['site']['ams_id']
 
    cam_stats = {}
-   freecal_index = load_json_file("/mnt/ams2/cal/freecal_index.json") 
+   freecal_index = load_json_file(AMS_HOME + "/cal/freecal_index.json") 
    for cal_file in freecal_index:
       d = freecal_index[cal_file]
       # check for bad vals
@@ -1355,7 +1355,7 @@ def cal_health(con, cur, json_conf, cam_num=None):
    jobs = []
    for cam_id in sorted(cam_stats):
       #print(cam_id, len(cam_stats[cam_id]['good_files']), "good", len(cam_stats[cam_id]['bad_files']), "bad")
-      lf = "/mnt/ams2/cal/multi_poly-{:s}-{:s}.info".format(station_id, cam_id)
+      lf = AMS_HOME + "/cal/multi_poly-{:s}-{:s}.info".format(station_id, cam_id)
       if os.path.exists(lf) is True:
          mp = load_json_file(lf)
          fun = (mp['x_fun'] + mp['y_fun'] ) / 2
@@ -1397,12 +1397,12 @@ def cal_health(con, cur, json_conf, cam_num=None):
    print(tb)
    cam_status = tb
    # write cam_status to txt file
-   cam_status_txt = "/mnt/ams2/cal/" + station_id + "_cal_status.txt"
+   cam_status_txt = AMS_HOME + "/cal/" + station_id + "_cal_status.txt"
    fp = open(cam_status_txt, "w")
    fp.write("CALIBRATION HEALTH FOR " + station_id + " Last updated " + now  + "\n")
    fp.write(str(cam_status) + "\n")
 
-   freecal_files = sorted(os.listdir("/mnt/ams2/cal/freecal"), reverse=True)
+   freecal_files = sorted(os.listdir(AMS_HOME + "/cal/freecal"), reverse=True)
    for f in freecal_files:
       if "json" in f and ".jpg" in f:
          print("BAD", f)
@@ -1627,7 +1627,7 @@ def reset_bad_cals(this_cam_id, con, cur,json_conf):
    # then move the folder/contents to the badcal dir and make sure it no longer exists
    # inside the freecal dir. Keep a log of resets. If a file has already been reset more than 2x just delete it. 
 
-   autocal_dir = "/mnt/ams2/cal/" 
+   autocal_dir = AMS_HOME + "/cal/" 
    station_id = json_conf['site']['ams_id']
 
    mcp = None
@@ -1636,7 +1636,7 @@ def reset_bad_cals(this_cam_id, con, cur,json_conf):
       if os.path.exists(mcp_file) == 1:
          mcp = load_json_file(mcp_file)
 
-   freecal_index = load_json_file("/mnt/ams2/cal/freecal_index.json") 
+   freecal_index = load_json_file(AMS_HOME + "/cal/freecal_index.json") 
    temp , temp_imgs = load_mask_imgs(json_conf)
    mask_imgs = {}
    for cam in temp:
@@ -1689,6 +1689,7 @@ def reset_bad_cals(this_cam_id, con, cur,json_conf):
       cam_id = cal_id.split("_")[-1]
       if cam_id == this_cam_id:
          if total_res_px > 12 or total_stars < 5:
+            print("RESETTTIIIIING 2")
             reset_cal_file(station_id, cal_id)
             print("RESET", cam_id, cal_id, total_stars, total_res_px)
          else:
@@ -1734,6 +1735,7 @@ def freecal_stats(cam_id, freecal_index, json_conf, stats, mask_imgs) :
          cal_params = load_json_file(cal_json_file)
       except:
          print(cal_json_file, "FILE IS BAD")
+         print("RESETTTIIIIING 3")
          reset_cal_file(station_id, cal_id)
          exit()
 
@@ -1796,18 +1798,20 @@ def reset_cal_file(station_id, cal_id):
    today = datetime.date.today()
    year = today.strftime("%Y")
    reset = 1
-   cal_dir = "/mnt/ams2/cal/freecal/" + cal_id + "/"
-   bad_cal_dir = "/mnt/ams2/cal/bad_cals/" + cal_id + "/"
+   cal_dir = AMS_HOME + "/cal/freecal/" + cal_id + "/"
+   bad_cal_dir = AMS_HOME + "/cal/bad_cals/" + cal_id + "/"
    stack_file = cal_dir + cal_id + "-stacked.png"
    
    # copy the source png back to the cal-in dir and hope it gets processed correctly the 'next' time.
-   cal_in_dir = "/mnt/ams2/meteor_archive/" + station_id + "/CAL/AUTOCAL/" + year + "/" 
+   cal_in_dir = AMS_HOME + "/meteor_archive/" + station_id + "/CAL/AUTOCAL/" + year + "/" 
    cmd1 = "cp " + stack_file + " " + cal_in_dir + cal_id + ".png"
    print(cmd1)
    if os.path.exists(bad_cal_dir) is False:
       print("mkdirs " + bad_cal_dir)
       os.makedirs(bad_cal_dir) 
  
+
+   print("MOOOOOOOOOOOOOOOOOOOOOOOOOVVVVVVVVVVVVVVIIIIIIIIIIIIIIIIIIIIIIIIIINNNNNNNNNNGGGGG")
    # move the freecal dir to the badcals (as backup in case we later need to recover it)
    cmd2 = "mv " + cal_dir + "* " + bad_cal_dir
    print(cmd2)
@@ -1823,7 +1827,7 @@ def reset_cal_file(station_id, cal_id):
    #
 
 def anchor_cal(cam_id, con, cur, json_conf):
-   freecal_index = load_json_file("/mnt/ams2/cal/freecal_index.json") 
+   freecal_index = load_json_file(AMS_HOME + "/cal/freecal_index.json") 
    fns = []
    azs = []
    els = []
@@ -1892,7 +1896,7 @@ def anchor_cal(cam_id, con, cur, json_conf):
    all_data['pos'] = pos 
    all_data['pxs'] = pxs 
    all_data['groups'] = groups 
-   anchor_file = "/mnt/ams2/cal/{:s}_{:s}_ANCHOR.json".format(json_conf['site']['ams_id'], cam_id)
+   anchor_file = AMS_HOME + "/cal/{:s}_{:s}_ANCHOR.json".format(json_conf['site']['ams_id'], cam_id)
 
 
    save_json_file(anchor_file, all_data)
@@ -2105,7 +2109,7 @@ def refit_summary(log):
 
 def star_track(cam_id, date, con, cur, json_conf ):
    y,m,d = date.split("_")
-   st_dir = "/mnt/ams2/cal/startrack/" + y + "/"
+   st_dir = AMS_HOME + "/cal/startrack/" + y + "/"
    st_file = st_dir + cam_id + "_" + date  + ".json"
    if os.path.exists(st_dir) is False:
       os.makedirs(st_dir)
@@ -2116,10 +2120,10 @@ def star_track(cam_id, date, con, cur, json_conf ):
 
    MM = MovieMaker()
    station_id = json_conf['site']['ams_id']
-   wild = "/mnt/ams2/HD/" + date + "*" + cam_id + "*.mp4"
+   wild = AMS_HOME + "/HD/" + date + "*" + cam_id + "*.mp4"
    hd_files = glob.glob(wild)
 
-   autocal_dir = "/mnt/ams2/cal/" 
+   autocal_dir = AMS_HOME + "/cal/" 
    mcp = None
    if mcp is None:
       mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
@@ -2363,8 +2367,8 @@ def remove_bad_stars(cat_image_stars):
 
 def plot_cal_history(con, cur, json_conf):
 
-   calindex_file = "/mnt/ams2/cal/freecal_index.json"
-   cal_dir = "/mnt/ams2/cal/"
+   calindex_file = AMS_HOME + "/cal/freecal_index.json"
+   cal_dir = AMS_HOME + "/cal/"
    if os.path.exists(calindex_file) is True:
       try:
          calindex = load_json_file(calindex_file)
@@ -2460,8 +2464,8 @@ def plot_cal_history(con, cur, json_conf):
 
 def plot_refit_meteor_day(meteor_day, con, cur, json_conf):
    print("plot_refit_meteor_day:", meteor_day)
-   meteor_dir = "/mnt/ams2/meteors/" + meteor_day + "/" 
-   refit_log_file = "/mnt/ams2/meteors/" + meteor_day + "/refit.log"
+   meteor_dir = AMS_HOME + "/meteors/" + meteor_day + "/" 
+   refit_log_file = AMS_HOME + "/meteors/" + meteor_day + "/refit.log"
    if os.path.exists(refit_log_file):
       mets = load_json_file(refit_log_file)
    else:
@@ -2514,7 +2518,7 @@ def plot_refit_meteor_day(meteor_day, con, cur, json_conf):
 def timelapse_day_fast(meteor_day, con, cur, json_conf):
    global MOVIE_FRAME_NUMBER
    global MOVIE_FRAMES_TEMP_FOLDER 
-   wdir = "/mnt/ams2/latest/" + meteor_day + "/"
+   wdir = AMS_HOME + "/latest/" + meteor_day + "/"
    cams = []
    files = os.listdir(wdir)
    station_id = json_conf['site']['ams_id']
@@ -2535,7 +2539,7 @@ def timelapse_day_fast(meteor_day, con, cur, json_conf):
    for cam in sorted(cams):
       first_frame_file = wdir + cam_files[cam][0]
       first_frame = cv2.resize(cv2.imread(first_frame_file), (1920,1080))
-      mcp_file = "/mnt/ams2/cal//multi_poly-{:s}-{:s}.info".format(station_id, cam)
+      mcp_file = AMS_HOME + "/cal//multi_poly-{:s}-{:s}.info".format(station_id, cam)
       mcp = load_json_file(mcp_file)
       #print(MOVIE_LAST_FRAME.shape)
       #print(first_frame.shape)
@@ -2604,14 +2608,14 @@ def refit_meteor_day(meteor_day, con, cur, json_conf):
 
    timelapse_day_fast(meteor_day, con, cur, json_conf)
 
-   files = os.listdir("/mnt/ams2/meteors/" + meteor_day + "/")
+   files = os.listdir(AMS_HOME + "/meteors/" + meteor_day + "/")
    cc = 1
    for ff in files:
       if "json" not in ff:
          continue
       if "reduced" in ff:
          continue
-      mjf = "/mnt/ams2/meteors/" + meteor_day + "/" + ff
+      mjf = AMS_HOME + "/meteors/" + meteor_day + "/" + ff
       if os.path.exists(mjf) :
          mjrf = mjf.replace(".json", "-reduced.json")
          if os.path.exists(mjf) is True:
@@ -2646,7 +2650,7 @@ def refit_meteor_day(meteor_day, con, cur, json_conf):
       cc += 1
 
    print("Done day", meteor_day)
-   mdir = "/mnt/ams2/meteors/" + meteor_day + "/"
+   mdir = AMS_HOME + "/meteors/" + meteor_day + "/"
 
    refit_log_file = mdir + "refit.log"
    refit_sum_file = mdir + "refit_summary.log"
@@ -2655,7 +2659,7 @@ def refit_meteor_day(meteor_day, con, cur, json_conf):
       refit_log = load_json_file(refit_log_file)
       report = refit_summary(refit_log)
       save_json_file(refit_sum_file, report)
-   vid_dir = "/mnt/ams2/day_summary/"
+   vid_dir = AMS_HOME + "/day_summary/"
    if os.path.exists(vid_dir) is False:
       os.makedirs(vid_dir)
    cmd = "./FFF.py imgs_to_vid ~/REFIT_METEOR_FRAMES_TEMP/ 00 /mnt/ams2/day_summary/" + meteor_day + ".mp4 25 28"
@@ -2703,7 +2707,7 @@ def refit_meteor(meteor_file, con, cur, json_conf, mcp = None, last_best_dict = 
    if last_best_dict is None:
       last_best_dict = {}
 
-   autocal_dir = "/mnt/ams2/cal/" 
+   autocal_dir = AMS_HOME + "/cal/" 
 
    # load the MCP if it exists
    if mcp is None:
@@ -2718,11 +2722,11 @@ def refit_meteor(meteor_file, con, cur, json_conf, mcp = None, last_best_dict = 
 
    # setup dirs and filenames 
    day = meteor_file[0:10]
-   mdir = "/mnt/ams2/meteors/" + day + "/" 
+   mdir = AMS_HOME + "/meteors/" + day + "/" 
    fit_img_file = mdir + meteor_file.replace(".json", "-rfit.jpg")
-   sd_vid = "/mnt/ams2/meteors/" + day + "/" + meteor_file.replace(".json", ".mp4")
-   json_file = "/mnt/ams2/meteors/" + day + "/" + meteor_file #.replace(".mp4", ".json")
-   red_json_file = "/mnt/ams2/meteors/" + day + "/" + meteor_file.replace(".json", "-reduced.json")
+   sd_vid = AMS_HOME + "/meteors/" + day + "/" + meteor_file.replace(".json", ".mp4")
+   json_file = AMS_HOME + "/meteors/" + day + "/" + meteor_file #.replace(".mp4", ".json")
+   red_json_file = AMS_HOME + "/meteors/" + day + "/" + meteor_file.replace(".json", "-reduced.json")
    stack_file = json_file.replace(".json", "-stacked.jpg")
 
 
@@ -3143,7 +3147,7 @@ def refit_meteor(meteor_file, con, cur, json_conf, mcp = None, last_best_dict = 
    if video_file is None:
       print("VIDEO FILE IS NONE!", meteor_file)
       video_file = meteor_file.replace(".json", ".mp4")
-      mdir = "/mnt/ams2/meteors/" + video_file[0:10] + "/"
+      mdir = AMS_HOME + "/meteors/" + video_file[0:10] + "/"
       mj['sd_video_file'] = mdir + video_file 
       video_file = mdir + video_file 
       mjf = video_file.replace(".mp4", ".json")
@@ -3167,7 +3171,7 @@ def refit_meteor(meteor_file, con, cur, json_conf, mcp = None, last_best_dict = 
 
 def subtract_mask(cal_img, station_id, cam_id):
 
-   mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+   mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
    if os.path.exists(mask_file) is True:
       mask = cv2.imread(mask_file)
       mask = cv2.resize(mask, (1920,1080))
@@ -3369,7 +3373,7 @@ def update_mfd(meteor_file, mjr, cp):
    mjr['meteor_frame_data'] = sorted(mjr['meteor_frame_data'], key=lambda x: (x[1]), reverse=False)
    # make sure we are using the manual points if defined. 
    mday = meteor_file[0:10]
-   mdir = "/mnt/ams2/meteors/" + mday + "/"
+   mdir = AMS_HOME + "/meteors/" + mday + "/"
    mj = load_json_file(mdir + meteor_file)
    man = None
    if "user_mods" in mj:
@@ -3738,12 +3742,19 @@ def minimize_fov(cal_file, cal_params, image_file,img,json_conf,zero_poly=False,
    ores = check_cal_params['total_res_px']
 
    res = scipy.optimize.minimize(reduce_fov_pos, this_poly, args=( az,el,pos,pixscale,x_poly, y_poly, x_poly_fwd, y_poly_fwd, image_file,img,json_conf, cal_params['cat_image_stars'],extra_text,0), method='Nelder-Mead')
+   print("Res:", res)
 
+   print("Type of x_poly:", type(cal_params["x_poly"]))
    if isinstance(cal_params['x_poly'], list) is not True:
       cal_params['x_poly'] = x_poly.tolist()
       cal_params['y_poly'] = y_poly.tolist()
       cal_params['x_poly_fwd'] = x_poly_fwd.tolist()
       cal_params['y_poly_fwd'] = y_poly_fwd.tolist()
+   else:
+      cal_params['x_poly'] = x_poly
+      cal_params['y_poly'] = y_poly
+      cal_params['x_poly_fwd'] = x_poly_fwd
+      cal_params['y_poly_fwd'] = y_poly_fwd
 
    adj_az, adj_el, adj_pos, adj_px = res['x']
 
@@ -3877,9 +3888,9 @@ def delete_cal_file(cal_fn, con, cur, json_conf):
 
    if False:
       # don't do this here!
-      cal_dir = "/mnt/ams2/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "")
+      cal_dir = AMS_HOME + "/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "")
       base = cal_dir.split("/")[-1] 
-      bad_dir = "/mnt/ams2/cal/bad_cals/" + cal_fn.replace("-stacked-calparams.json", "")
+      bad_dir = AMS_HOME + "/cal/bad_cals/" + cal_fn.replace("-stacked-calparams.json", "")
       if os.path.exists(bad_dir) is False:
          os.makedirs(bad_dir)
       if os.path.exists(bad_dir + base) is True:
@@ -3900,7 +3911,7 @@ def delete_cal_file(cal_fn, con, cur, json_conf):
 def start_calib(cal_fn, json_conf, calfiles_data, mcp=None):
 
    #print("Start calib for : ", cal_fn)
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    station_id = json_conf['site']['ams_id']
    (f_datetime, cam_id, f_date_str,fy,fmin,fd, fh, fm, fs) = convert_filename_to_date_cam(cal_fn)
 
@@ -3928,7 +3939,7 @@ def start_calib(cal_fn, json_conf, calfiles_data, mcp=None):
    else:
       clean_cal_img = None
 
-   mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+   mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
    if os.path.exists(mask_file) is True:
       mask = cv2.imread(mask_file)
       mask = cv2.resize(mask, (1920,1080))
@@ -3985,11 +3996,11 @@ def cal_status_report(cam_id, con, cur, json_conf):
 
    station_id = json_conf['site']['ams_id']
 
-   if os.path.exists("/mnt/ams2/cal/plots") is False:
-      os.makedirs("/mnt/ams2/cal/plots")
+   if os.path.exists(AMS_HOME + "/cal/plots") is False:
+      os.makedirs(AMS_HOME + "/cal/plots")
 
 
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    # get all call files for this cam
    print("LOAD CAL FILES :", cam_id)
    calfiles_data = load_cal_files(cam_id, con, cur)
@@ -4038,7 +4049,7 @@ def cal_status_report(cam_id, con, cur, json_conf):
    avg_res = np.mean(stats_res)
    avg_stars = np.mean(stats_stars)
    # get all files from the cal-index / filesystem
-   freecal_index = load_json_file("/mnt/ams2/cal/freecal_index.json") 
+   freecal_index = load_json_file(AMS_HOME + "/cal/freecal_index.json") 
   
    need_to_load = {}
    cal_files_count = 0
@@ -4229,7 +4240,7 @@ def import_cal_file(cal_fn, cal_dir, mcp):
 def batch_review(station_id, cam_id, con, cur, json_conf, limit=25, work_type="top"):
 
    # load the mask
-   mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+   mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
    if os.path.exists(mask_file) is True:
       mask = cv2.imread(mask_file)
       #mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -4240,7 +4251,7 @@ def batch_review(station_id, cam_id, con, cur, json_conf, limit=25, work_type="t
    # set some vars
    my_limit = limit
    last_cal = None
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
 
    # load cal files from Database into an array
    calfiles_data = load_cal_files(cam_id, con, cur)
@@ -4369,7 +4380,7 @@ def batch_review(station_id, cam_id, con, cur, json_conf, limit=25, work_type="t
       more_stars = False
       cal_fn, total_stars, avg_res,score = row
       root = cal_fn.split("-")[0]
-      cal_dir = "/mnt/ams2/cal/freecal/" + root 
+      cal_dir = AMS_HOME + "/cal/freecal/" + root 
       if os.path.exists(cal_dir) is False:
          probs.append(root)
 
@@ -4410,7 +4421,7 @@ def batch_review(station_id, cam_id, con, cur, json_conf, limit=25, work_type="t
       orig_img = oimg.copy()
 
       # load mask
-      mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+      mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
       if os.path.exists(mask_file) is True:
          mask = cv2.imread(mask_file)
          mask = cv2.resize(mask, (1920,1080))
@@ -4566,7 +4577,7 @@ def batch_review(station_id, cam_id, con, cur, json_conf, limit=25, work_type="t
 
    for fn in cal_fns:
       root = fn.split("-")[0]
-      cal_dir = "/mnt/ams2/cal/freecal/" + root + "/"
+      cal_dir = AMS_HOME + "/cal/freecal/" + root + "/"
       if os.path.exists(cal_dir) is False:
          print("BAD:", cal_dir)
       else:
@@ -4581,7 +4592,7 @@ def batch_review(station_id, cam_id, con, cur, json_conf, limit=25, work_type="t
 def revert_to_wcs(cal_fn,mcp=None):
 
 
-   cal_dir = "/mnt/ams2/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "") + "/"
+   cal_dir = AMS_HOME + "/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "") + "/"
    cal_file = cal_dir + cal_fn
    cal_img_file = cal_dir + "tmp/" + cal_fn.replace("-stacked-calparams.json", "-plate.jpg")
    cal_img = cv2.imread(cal_img_file)
@@ -4674,7 +4685,7 @@ def pair_star_points(cal_fn, oimg, cal_params, json_conf, con, cur, mcp, save_im
    # loop over each star point in the image and find a pair
    up_cat_image_stars = []
    if "star_points" not in cal_params:
-      cal_dir = "/mnt/ams2/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "") + "/tmp/" 
+      cal_dir = AMS_HOME + "/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "") + "/tmp/" 
       if os.path.exists(cal_dir + cal_fn.replace("-stacked-calparams.json", "-plate.jpg")):
          cal_img = cv2.imread(cal_dir + cal_fn.replace("-stacked-calparams.json", "-plate.jpg"))
       else:
@@ -4728,7 +4739,7 @@ def pair_star_points(cal_fn, oimg, cal_params, json_conf, con, cur, mcp, save_im
             #if SHOW == 1:
             #   cv2.imshow('pepe', show_img)
 
-   cal_dir = "/mnt/ams2/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
+   cal_dir = AMS_HOME + "/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
 
    return(up_cat_image_stars)
       
@@ -4905,7 +4916,7 @@ def solve_field(plate_file, json_conf, con, cur):
       cal_fn = cal_params_file.split("/")[-1]
 
       (f_datetime, cam_id, f_date_str,fy,fmin,fd, fh, fm, fs) = convert_filename_to_date_cam(cal_fn)
-      autocal_dir = "/mnt/ams2/cal/"
+      autocal_dir = AMS_HOME + "/cal/"
       mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
       if os.path.exists(mcp_file) == 1:
          mcp = load_json_file(mcp_file)
@@ -4919,8 +4930,8 @@ def solve_field(plate_file, json_conf, con, cur):
 
    else:
       print("Astrometry.net failed")
-      if os.path.exists("/mnt/ams2/cal/bad_cals/") is False:
-         os.makedirs("/mnt/ams2/cal/bad_cals/")
+      if os.path.exists(AMS_HOME + "/cal/bad_cals/") is False:
+         os.makedirs(AMS_HOME + "/cal/bad_cals/")
       cmd = "mv " + cal_dir + " /mnt/ams2/cal/bad_cals/" 
       print(cmd)
       os.system(cmd)
@@ -4928,7 +4939,7 @@ def solve_field(plate_file, json_conf, con, cur):
 
 def best_wcs(cal_fn, cal_params, oimg, con, cur, mcp):
 
-   all_wcs_file = "/mnt/ams2/cal/wcs_index.json"
+   all_wcs_file = AMS_HOME + "/cal/wcs_index.json"
    if os.path.exists(all_wcs_file) is True:
       all_wcs = load_json_file(all_wcs_file)
       print(all_wcs)
@@ -4972,8 +4983,8 @@ def best_wcs(cal_fn, cal_params, oimg, con, cur, mcp):
 
 def run_astr(cam_id, json_conf, con, cur):
    # check and run if needed astronomy on all calfiles matching the cam_id
-   cal_index = load_json_file("/mnt/ams2/cal/freecal_index.json")
-   all_wcs_file = "/mnt/ams2/cal/wcs_index.json"
+   cal_index = load_json_file(AMS_HOME + "/cal/freecal_index.json")
+   all_wcs_file = AMS_HOME + "/cal/wcs_index.json"
    all_wcs = []
    for cal_file in cal_index:
       data = cal_index[cal_file]
@@ -5161,7 +5172,7 @@ def star_points_report(cam_id, json_conf, con, cur):
    # make / verify star points and associated files for all cal_files in the system!
 
    all_merged_stars = []
-   all_merged_stars_file = "/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
+   all_merged_stars_file = AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
 
    console_image = np.zeros((360,640,3),dtype=np.uint8)
 
@@ -5169,7 +5180,7 @@ def star_points_report(cam_id, json_conf, con, cur):
    zp_image = np.zeros((1080,1920,3),dtype=np.uint8)
    zp_image_small = np.zeros((360,640,3),dtype=np.uint8)
    for cal_fn in calfiles_data:
-      cal_dir = "/mnt/ams2/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
+      cal_dir = AMS_HOME + "/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
       cal_img_file = cal_dir + cal_fn.replace("-calparams.json", ".png")
       cal_json_file = cal_dir + cal_fn
       star_points_file = cal_dir + cal_fn.replace("-calparams.json", "-star-points.json")
@@ -5325,7 +5336,7 @@ def star_points_report(cam_id, json_conf, con, cur):
          if SHOW == 1:
             cv2.imshow('pepe', final_img)
             cv2.waitKey(30)
-         #SHOW = 1
+         SHOW = 0
 
          # save new / updated json file 
          # and also update the DB
@@ -5347,10 +5358,10 @@ def star_points_all(cam_id, json_conf, con, cur):
    station_id = json_conf['site']['ams_id']
    # make / verify star points and associated files for all cal_files in the system!
 
-   zp_image_file = "/mnt/ams2/cal/plots/" + station_id + "_" + cam_id + "_ZP_STARS.jpg"
+   zp_image_file = AMS_HOME + "/cal/plots/" + station_id + "_" + cam_id + "_ZP_STARS.jpg"
    zp_image = np.zeros((1080,1920,3),dtype=np.uint8)
    for cal_fn in calfiles_data:
-      cal_dir = "/mnt/ams2/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
+      cal_dir = AMS_HOME + "/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
       cal_img_file = cal_dir + cal_fn.replace("-calparams.json", ".png")
       cal_json_file = cal_dir + cal_fn
       star_points_file = cal_dir + cal_fn.replace("-calparams.json", "-star-points.json")
@@ -5590,7 +5601,7 @@ def pair_points(cal_fn, star_points, star_pairs_file, star_pairs_image_file, cal
 def get_star_points(cal_fn, oimg, cp, station_id, cam_id, json_conf):
    SHOW = 0
    gsize = 50
-   mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+   mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
    if os.path.exists(mask_file) is True:
       mask = cv2.imread(mask_file)
       #mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -6540,7 +6551,7 @@ def ai_check_star(img, img_file):
    # SHOULD CHACHE THESE!! 
    # AND LEARN FROM THEM 
    if os.path.exists(img_file) is False:
-      temp_file = "/mnt/ams2/tempstar.jpg"
+      temp_file = AMS_HOME + "/tempstar.jpg"
       cv2.imwrite(temp_file, img)
    else:
       temp_file = img_file
@@ -6620,7 +6631,7 @@ def get_contours_in_image(frame ):
    return(cont)
 
 def cal_dir_from_file(cal_file):
-   freecal_dir = "/mnt/ams2/cal/freecal/" 
+   freecal_dir = AMS_HOME + "/cal/freecal/" 
    #2022_05_18_06_32_03_000_010001-stacked-fit.jpg
    if "trim" not in cal_file:
       cal_root_fn = cal_file.split("-")[0]
@@ -6629,6 +6640,7 @@ def cal_dir_from_file(cal_file):
       cal_root_fn = cal_file 
    
    cal_dir = freecal_dir + cal_root_fn + "/"
+   print("CAL DIR:", cal_dir)
    if os.path.isdir(cal_dir):
       return(cal_dir)
    else:
@@ -6671,7 +6683,7 @@ def make_star_roi(x,y,size):
 
 def get_mcp(cam_id) :
 
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
    if os.path.exists(mcp_file) == 1:
       mcp = load_json_file(mcp_file)
@@ -6733,7 +6745,7 @@ def batch_apply_bad(cam_id, con, cur, json_conf, blimit=25):
 
 
    calfiles_data = load_cal_files(cam_id, con, cur)
-   mcp_file = "/mnt/ams2/cal/multi_poly-" + station_id + "-" + cam_id + ".info"
+   mcp_file = AMS_HOME + "/cal/multi_poly-" + station_id + "-" + cam_id + ".info"
 
    tsize,tdiff = get_file_info(mcp_file )
 
@@ -6816,7 +6828,7 @@ def batch_apply_bad(cam_id, con, cur, json_conf, blimit=25):
       (cal_fn, total_stars, res , score) = row
       if True:
          cdir = cal_fn.split("-")[0]
-         cal_dir = "/mnt/ams2/cal/freecal/" + cdir + "/"
+         cal_dir = AMS_HOME + "/cal/freecal/" + cdir + "/"
          if os.path.exists(cal_dir):
             last_cal_params,flux_table = apply_calib (cal_fn, calfiles_data, json_conf, mcp )
             if last_cal_params is None:
@@ -6876,7 +6888,7 @@ def copy_best_cal_images(con, cur, json_conf):
    for cam_num in json_conf['cameras']:
       cam_id = json_conf['cameras'][cam_num]['cams_id']
       cams_list.append(cam_id)
-      best_local_dir = "/mnt/ams2/CAL/IMAGES/" + cam_id + "/"
+      best_local_dir = AMS_HOME + "/CAL/IMAGES/" + cam_id + "/"
       best_cloud_dir = "/mnt/archive.allsky.tv/" + station_id + "/CAL/IMAGES/" + cam_id + "/"
       if os.path.exists(best_local_dir) is False:
          os.makedirs(best_local_dir)
@@ -6892,7 +6904,7 @@ def batch_apply(cam_id, con,cur, json_conf, last=None, do_bad=False, cam_stats=N
 
    # apply the latest MCP Poly to each cal file and then recenter them
    print("BATCH APPLY:", apply_type)
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    station_id = json_conf['site']['ams_id']
    if SHOW == 1:
       cv2.namedWindow("pepe")
@@ -6932,7 +6944,7 @@ def batch_apply(cam_id, con,cur, json_conf, last=None, do_bad=False, cam_stats=N
          if limit is None:
             limit = len(calfiles_data) 
          for cf in sorted(calfiles_data, reverse=True)[0:limit]:
-            cal_dir = "/mnt/ams2/cal/freecal/" + cf.split("-")[0] + "/"
+            cal_dir = AMS_HOME + "/cal/freecal/" + cf.split("-")[0] + "/"
 
             if cf in calfiles_data:
                (station_id, camera_id, cal_fn, cal_ts, az, el, ra, dec, position_angle,\
@@ -7224,6 +7236,7 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
       #os.system("clear")
       #print("apply_calib:", cal_file)
       station_id = json_conf['site']['ams_id']
+      print("CAL FILE: %s" % cal_file)
 
       now = datetime.datetime.now()
       cur_year = now.strftime("%Y")
@@ -7233,22 +7246,24 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
       cal_dir = cal_dir_from_file(cal_file)
 
       try:
-         cal_params = load_json_file(cal_dir + cal_file)
-      except:
+         cal_params = load_json_file((cal_dir if cal_dir else "") + cal_file)
+      except Exception as e:
+         print("EXCEPTION:", e)
          print("\tERROR: Failed to load cal file!", cal_dir , cal_file)
          return(None,None)
       cal_params['cat_image_stars'] = remove_bad_stars(cal_params['cat_image_stars'])
 
       cal_image_file = cal_file.replace("-calparams.json", ".png")
-      if os.path.exists(cal_dir + cal_image_file) is True:
-         oimg = cv2.imread(cal_dir + cal_image_file)
+      print("Cal image file: ", cal_image_file, "cal image dir:", cal_dir, (cal_dir if cal_dir else "")  + cal_image_file)
+      if os.path.exists((cal_dir if cal_dir else "")  + cal_image_file) is True:
+         oimg = cv2.imread((cal_dir if cal_dir else "") + cal_image_file)
       else:
          print("\tERROR: Failed to load cal image file!", cal_dir , cal_image_file)
          return(None,None)
 
 
       # get mask
-      mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+      mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
       if os.path.exists(mask_file) is True:
          if len(oimg.shape) == 3:
             mask = cv2.imread(mask_file)
@@ -7297,7 +7312,7 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
          if "reapply" in cal_params:
             if cal_params['reapply'] >= 2:
                # reset this file! 
-               auto_dir = "/mnt/ams2/meteor_archive/" + station_id + "/CAL/AUTOCAL/" + cur_year + "/"
+               auto_dir = AMS_HOME + "/meteor_archive/" + station_id + "/CAL/AUTOCAL/" + cur_year + "/"
                # add code to track the # of times this has been done. Only allow it 1-2 times then perma delete the calib file
                print("BAD CAL REMOVE:", len(cal_params['cat_image_stars']), cal_params['total_res_px'])
                cmd = "cp " + cal_dir + cal_image_file + " " + auto_dir + cal_image_file.replace("-stacked.png", ".png")
@@ -7347,7 +7362,7 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
          cal_params['x_poly_fwd'] = np.zeros(shape=(15,), dtype=np.float64)
          cal_params['y_poly_fwd'] = np.zeros(shape=(15,), dtype=np.float64)
 
-      mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+      mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
       if os.path.exists(mask_file) is True:
          if len(oimg.shape) == 3:
             mask = cv2.imread(mask_file)
@@ -7377,14 +7392,15 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
       print("START IMG STARS/CAT STARS/RES:", len(star_points), len(cal_params['cat_image_stars']), cal_params['total_res_px']) 
 
       # revert to WCS
-      if cal_params['total_res_px'] > 8:
-         cal_id = cal_file.split("/")[-1].split("-")[0]
-         reset_cal_file(station_id, cal_id)
-         #rev_cal_params = revert_to_wcs(cal_fn)
-         rev_cal_params = None
+      #if cal_params['total_res_px'] > 8:
+      #   cal_id = cal_file.split("/")[-1].split("-")[0]
+      #   print("RESETTTIIIIING 1")
+      #   reset_cal_file(station_id, cal_id)
+      #   #rev_cal_params = revert_to_wcs(cal_fn)
+      #   rev_cal_params = None
 
-      else:
-         rev_cal_params = None
+      #else:
+      rev_cal_params = None
 
       if rev_cal_params is not None:
          rev_cal_params['cat_image_stars'] = pair_star_points(cal_fn, oimg, rev_cal_params, json_conf, con, cur, mcp, False)
@@ -7481,9 +7497,8 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
 
 
       if len(cal_params['cat_image_stars']) < 10:
-           
-         if os.path.exists("/mnt/ams2/cal/bad_cals/") is False:
-            os.makedirs("/mnt/ams2/cal/bad_cals/")
+         if os.path.exists(AMS_HOME + "/cal/bad_cals/") is False:
+            os.makedirs(AMS_HOME + "/cal/bad_cals/")
          cmd = "mv " + cal_dir + " /mnt/ams2/cal/bad_cals/" 
          print(cmd)
          os.system(cmd)
@@ -7653,6 +7668,7 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
       
      
       if temp_cal_params['total_res_px'] <= cal_params['total_res_px'] or True:
+         print("Updating cal params")
          cal_params = temp_cal_params
       #else:
       #   print("\tCAL PARAMS OPTIMIZER FAILED!")
@@ -7680,9 +7696,10 @@ def apply_calib (cal_file, calfiles_data, json_conf, mcp, last_cal_params=None, 
          #delete_cal_file(cal_fn, con, cur, json_conf)
          print("\n\n (*** DELETE BAD CAL FILE? ***)" + cal_fn)
 
-         bad_cal_dir = "/mnt/ams2/cal/bad_cals/"
+         bad_cal_dir = AMS_HOME + "/cal/bad_cals/"
          if os.path.exists(bad_cal_dir) is False:
             os.makedirs(bad_cal_dir)
+         print("iAAAA    MOOOOOOOOOOOOOOOOOOOOOOOOOVVVVVVVVVVVVVVIIIIIIIIIIIIIIIIIIIIIIIIIINNNNNNNNNNGGGGG")
          cmd = "mv " + cal_dir + " " + bad_cal_dir
          cal_root = cal_dir.split("/")[-1]
 
@@ -7857,7 +7874,7 @@ def debug_image(cal_params, cal_img):
 #   exit()
 
 def show_calparams(cal_params):
-   if False:
+   if True:
       for key in cal_params:
          if "star" in key:
             print("CP", key, len(cal_params[key]))
@@ -7867,7 +7884,7 @@ def show_calparams(cal_params):
             print("CP", key, cal_params[key])
 
 def update_calfiles(cam_id, con,cur, json_conf):
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    station_id = json_conf['site']['ams_id']
 
    calfiles_data = load_cal_files(cam_id, con, cur)
@@ -7912,7 +7929,7 @@ def recenter_fov(cal_fn, cal_params, cal_img, stars, json_conf, extra_text="", t
       station_id = json_conf['site']['ams_id']
    (f_datetime, cam_id, f_date_str,fy,fmin,fd, fh, fm, fs) = convert_filename_to_date_cam(cal_fn)
    # make sure we are using the latest MCP!
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
    if "x_poly" in cal_params:
       mcp = None
@@ -8815,7 +8832,7 @@ def update_calibration_file(cal_fn, cal_params, con,cur,json_conf,mcp):
 def update_calfile(cal_fn, con, cur, json_conf, mcp):
 
    cal_root = cal_fn.split("-")[0]
-   cal_dir = "/mnt/ams2/cal/freecal/" + cal_root + "/"  
+   cal_dir = AMS_HOME + "/cal/freecal/" + cal_root + "/"  
    cal_img_fn = cal_fn.replace("-calparams.json", ".png")
    if os.path.exists(cal_dir + cal_img_fn):
       cal_img = cv2.imread(cal_dir + cal_img_fn)
@@ -9405,14 +9422,14 @@ def quality_check_all_cal_files(cam_id, con, cur, cal_index=None):
    print("AVG RES:", avg_res)
    calfiles_data  = load_cal_files(cam_id, con,cur)
 
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    mcp_file = autocal_dir + "multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
    if os.path.exists(mcp_file) == 1:
       mcp = load_json_file(mcp_file)
 
 
    if cal_index is None:
-      cal_index = load_json_file("/mnt/ams2/cal/freecal_index.json")
+      cal_index = load_json_file(AMS_HOME + "/cal/freecal_index.json")
 
    last_cal_params = None
    above_avg_res = 0
@@ -9482,7 +9499,7 @@ def find_stars_with_catalog(cal_fn, con, cur, json_conf,mcp=None, cp=None, cal_i
       cal_json_file = get_cal_json_file(cal_dir)
    else:
       date = cal_fn[0:10]
-      cal_dir = "/mnt/ams2/meteors/" + date + "/"
+      cal_dir = AMS_HOME + "/meteors/" + date + "/"
       cal_json_file = cal_dir + cal_fn
 
    cal_json_fn = cal_json_file.split("/")[-1]
@@ -9492,7 +9509,7 @@ def find_stars_with_catalog(cal_fn, con, cur, json_conf,mcp=None, cp=None, cal_i
       clean_cal_img = cv2.imread(cal_dir + cal_img_fn)
    clean_cal_img = cv2.resize(clean_cal_img, (1920,1080))
 
-   mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+   mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
    if os.path.exists(mask_file) is True:
       mask = cv2.imread(mask_file)
       #mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -9820,7 +9837,7 @@ def eval_star_crop(crop_img, cal_fn, x1, y1,x2,y2, star_cat_info=None ):
       star_obj['valid_star'] = False
       return(star_obj)
    reject_reason = ""
-   learn_dir = "/mnt/ams2/datasets/cal_stars/"
+   learn_dir = AMS_HOME + "/datasets/cal_stars/"
    if os.path.exists(learn_dir) is False:
       os.makedirs(learn_dir)
    roi_end = "_" + str(x1) + "_" + str(y1) + "_" + str(x2) + "_" + str(y2)
@@ -10217,7 +10234,7 @@ def get_default_cal_for_file(cam_id, obs_file, img, con, cur, json_conf):
    print(med_pxs, best_med_pxs)
    print(med_res, best_med_res)
 
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    mcp_file = autocal_dir + "multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
    if os.path.exists(mcp_file) == 1:
       mcp = load_json_file(mcp_file)
@@ -10249,7 +10266,7 @@ def get_default_cal_for_file_with_range(cam_id, obs_file, img, con, cur, json_co
    # use this function to get a default cal when no stars or info 
    # is present
 
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    mcp_file = autocal_dir + "multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
    if os.path.exists(mcp_file) == 1:
       mcp = load_json_file(mcp_file)
@@ -10291,12 +10308,12 @@ def get_cal_range(obs_file, img, con, cur, json_conf):
 
    (cal_date, cam_id, f_date_str,fy,fmin,fd, fh, fm, fs) = convert_filename_to_date_cam(obs_file)
    station_id = json_conf['site']['ams_id']
-   lens_model_file = "/mnt/ams2/cal/multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
+   lens_model_file = AMS_HOME + "/cal/multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
    if os.path.exists(lens_model_file) is True:
       lens_model = load_json_file(lens_model_file)
    else:
        lens_model = {}
-   cal_range = load_json_file("/mnt/ams2/cal/" + json_conf['site']['ams_id'] + "_cal_range.json")
+   cal_range = load_json_file(AMS_HOME + "/cal/" + json_conf['site']['ams_id'] + "_cal_range.json")
  
    #print("OBS FILE:", obs_file)
    #img = cv2.imread(obs_file.replace(".mp4", "-stacked.jpg"))
@@ -10363,7 +10380,7 @@ def get_best_cal_files(cam_id, con, cur, json_conf, limit=500):
 def fast_lens(cam_id, con, cur, json_conf,limit=5, cal_fns=None):
    fast_img = np.zeros((1080,1920,3),dtype=np.uint8)
    station_id = json_conf['site']['ams_id']
-   mcp_file = "/mnt/ams2/cal/multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
+   mcp_file = AMS_HOME + "/cal/multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
    if os.path.exists(mcp_file) == 1:
       mcp = load_json_file(mcp_file)
       if "cal_version" not in mcp:
@@ -10378,7 +10395,7 @@ def fast_lens(cam_id, con, cur, json_conf,limit=5, cal_fns=None):
       mcp = None
 
    # get mask
-   mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+   mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
    if os.path.exists(mask_file) is True:
       mask_img = cv2.imread(mask_file)
       mask_img = cv2.resize(mask_img, (1920,1080))
@@ -10436,7 +10453,7 @@ def fast_lens(cam_id, con, cur, json_conf,limit=5, cal_fns=None):
 
       extra_text = "Fast lens : after re-center fov"
       star_img = draw_star_image(cal_img, cal_params['cat_image_stars'],cal_params, json_conf, extra_text)
-      cv2.imwrite("/mnt/ams2/last.jpg", star_img)
+      cv2.imwrite(AMS_HOME + "/last.jpg", star_img)
 
       ocps = cal_params['cat_image_stars'] 
      
@@ -10527,7 +10544,7 @@ def fast_lens(cam_id, con, cur, json_conf,limit=5, cal_fns=None):
          #print("FAST IMAGE")
          #cv2.waitKey(30)
 
-   save_json_file("/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", merged_stars)
+   save_json_file(AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", merged_stars)
    cv2.imwrite('/mnt/ams2/fast_img.jpg', fast_img)
    print('saved /mnt/ams2/fast_img.jpg' )
 
@@ -10546,7 +10563,7 @@ def characterize_best(cam_id, con, cur, json_conf,limit=50, cal_fns=None):
    if cal_fns is None:
       cal_fns = list(calfiles_data.keys())[0:limit]
 
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    all_stars_image_file = autocal_dir + "plots/" + json_conf['site']['ams_id'] + "_" + cam_id + "_ALL_STARS.jpg"
    mcp_file = autocal_dir + "multi_poly-" + json_conf['site']['ams_id'] + "-" + cam_id + ".info"
    if os.path.exists(mcp_file) == 1:
@@ -10631,8 +10648,8 @@ def characterize_best(cam_id, con, cur, json_conf,limit=50, cal_fns=None):
             cal_params = load_json_file(cal_dir + cal_fn)
          except:
             print("bad cal file!", cal_dir + cal_fn)
-            if os.path.exists("/mnt/ams2/cal/bad_cals/") is False:
-               os.makedirs("/mnt/ams2/cal/bad_cals/")
+            if os.path.exists(AMS_HOME + "/cal/bad_cals/") is False:
+               os.makedirs(AMS_HOME + "/cal/bad_cals/")
             cmd = "mv " + cal_dir + " /mnt/ams2/cal/bad_cals/" 
             #print(cmd)
             os.system(cmd)
@@ -10853,8 +10870,8 @@ def characterize_best(cam_id, con, cur, json_conf,limit=50, cal_fns=None):
       cv2.waitKey(30)
 
 
-   save_json_file("/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", merged_stars)
-   save_json_file("/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", best_stars)
+   save_json_file(AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", merged_stars)
+   save_json_file(AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", best_stars)
    #print("\tSAVED STARS FOR MODEL! /mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", len(best_stars), "stars")
    if len(best_stars) < 10:
       print("LESS THAN 10 stars IN MODEL ABORT!", len(not_best_stars))
@@ -10905,7 +10922,7 @@ def plot_star_chart(base_image, cat_stars, zp_cat_stars):
 
 def characterize_fov(cam_id, con, cur, json_conf):
    station_id = json_conf['site']['ams_id']
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
    if os.path.exists(mcp_file) == 1:
       mcp = load_json_file(mcp_file)
@@ -10915,7 +10932,7 @@ def characterize_fov(cam_id, con, cur, json_conf):
    else:
       mcp = None
    print("YO1-1")
-   photo_file = "/mnt/ams2/cal/plots/" + json_conf['site']['ams_id'] + "_" + cam_id + "_MAG_FLUX.png"
+   photo_file = AMS_HOME + "/cal/plots/" + json_conf['site']['ams_id'] + "_" + cam_id + "_MAG_FLUX.png"
    best_cal_files, best_dict = get_best_cal_files(cam_id, con, cur, json_conf, 400)
    title = json_conf['site']['ams_id'] + " " + cam_id + " CALIBRATION FLUX MAGNITUDE PLOT"
 
@@ -11117,11 +11134,11 @@ def characterize_fov(cam_id, con, cur, json_conf):
    if SHOW == 1:
       cv2.imshow("pepe", grid_img)
       cv2.waitKey(90)
-   cv2.imwrite("/mnt/ams2/cal/plots/" + station_id + "_" + cam_id + "_ALL_GOOD_STARS.jpg", grid_img)
+   cv2.imwrite(AMS_HOME + "/cal/plots/" + station_id + "_" + cam_id + "_ALL_GOOD_STARS.jpg", grid_img)
 
    print("saved all stars image /mnt/ams2/cal/plots/" + station_id + "_" + cam_id + "_ALL_GOOD_STARS.jpg")
-   save_json_file("/mnt/ams2/cal/" + station_id + "_" + cam_id + "_ALL_GOOD_STARS.json", all_good_stars)
-   print("saved", "/mnt/ams2/cal/" + station_id + "_" + cam_id + "_ALL_GOOD_STARS.json")
+   save_json_file(AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_ALL_GOOD_STARS.json", all_good_stars)
+   print("saved", AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_ALL_GOOD_STARS.json")
    con.commit()
    # plot all stars?
 
@@ -11146,7 +11163,7 @@ def characterize_fov(cam_id, con, cur, json_conf):
 
       match_dist = 9999
       merged_stars.append((cal_file , center_az, center_el, ra_center, dec_center, position_angle, pixscale, name,mag,ra,dec,ra,dec,match_dist,new_cat_x,new_cat_y,center_az,center_el,new_cat_x,new_cat_y,img_x,img_y,zp_res_px,star_flux)) 
-   save_json_file("/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", merged_stars)
+   save_json_file(AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", merged_stars)
    print("YO3")
    if mcp is not None:
       make_cal_summary(cam_id, json_conf)
@@ -11188,8 +11205,8 @@ def reconcile_calfiles(cam_id, con, cur, json_conf):
    bad_cals = []
    for cal_fn in all_files:
       root = cal_fn.split("-")[0]
-      free_cal_dir = "/mnt/ams2/cal/freecal/"
-      extra_cal_dir = "/mnt/ams2/cal/extracal/"
+      free_cal_dir = AMS_HOME + "/cal/freecal/"
+      extra_cal_dir = AMS_HOME + "/cal/extracal/"
       cal_dir = free_cal_dir + root
       if os.path.exists(cal_dir) is False:
          print("bad calfile:", cal_fn)
@@ -11294,7 +11311,7 @@ def get_grid_key(grid_data, img_x, img_y, zp_res_px, zp_slope):
          return(gkey)
       
 def batch_calib(cam_id, con, cur, json_conf):
-   free_cal_dir = "/mnt/ams2/cal/freecal/"
+   free_cal_dir = AMS_HOME + "/cal/freecal/"
    cal_dirs = glob.glob(free_cal_dir + "*" + cam_id + "*")
    for ccd in sorted(cal_dirs, reverse=True):
       cal_fn = ccd.split("/")[-1]
@@ -11357,7 +11374,7 @@ def lens_model(cam_id, con, cur, json_conf, cal_fns= None, force=False):
    lens_img = np.zeros((1080,1920,3),dtype=np.uint8)
    station_id = json_conf['site']['ams_id']
    limit = 1000
-   lens_img_file = "/mnt/ams2/cal/" + station_id + "_" + cam_id + "_LENS_IMG_STARS.jpg"
+   lens_img_file = AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_LENS_IMG_STARS.jpg"
    #cal_fns = batch_review(station_id, cam_id, con, cur, json_conf, limit)
 
    #save_json_file(cal_sum_file, cal_sum)
@@ -11382,7 +11399,7 @@ def lens_model(cam_id, con, cur, json_conf, cal_fns= None, force=False):
          cal_fns.append(row[0])
 
 
-   mask_file = "/mnt/ams2/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
+   mask_file = AMS_HOME + "/meteor_archive/{}/CAL/MASKS/{}_mask.png".format(station_id, cam_id)
 
    if os.path.exists(mask_file) is True:
       mask = cv2.imread(mask_file)
@@ -11391,7 +11408,7 @@ def lens_model(cam_id, con, cur, json_conf, cal_fns= None, force=False):
    else:
       mask = np.zeros((1080,1920),dtype=np.uint8)
 
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    station_id = json_conf['site']['ams_id']
 
    mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
@@ -11426,7 +11443,7 @@ def lens_model(cam_id, con, cur, json_conf, cal_fns= None, force=False):
 
 
 
-   merged_stars = load_json_file("/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json")
+   merged_stars = load_json_file(AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json")
 
    if len(merged_stars) < 25:
       print("NOT ENOUGH MERGED STARS. NEED >= 25 you have:", len(merged_stars))
@@ -11597,7 +11614,7 @@ def lens_model(cam_id, con, cur, json_conf, cal_fns= None, force=False):
 
 
    if len(new_merged_stars) > 500:
-      save_json_file("/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", new_merged_stars)
+      save_json_file(AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json", new_merged_stars)
 
    rez = [row[-2] for row in new_merged_stars] 
    mean_rez = np.median(rez) 
@@ -11696,7 +11713,7 @@ def wizard(station_id, cam_id, con, cur, json_conf, file_limit=25):
 
    # lens_model_final_report()
    lens_model_report(cam_id, con, cur, json_conf)
-   merged_star_file = "/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
+   merged_star_file = AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
    merged_stars = load_json_file(merged_star_file)
    make_lens_model(cam_id, json_conf, merged_stars)
    #try:
@@ -11710,7 +11727,7 @@ def lens_model_report(cam_id, con, cur, json_conf):
    characterize_best(cam_id, con, cur, json_conf)
 
    station_id = json_conf['site']['ams_id']
-   msfile = "/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
+   msfile = AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
    if os.path.exists(msfile) is True:
       merged_stars = load_json_file(msfile)
    make_cal_plots(cam_id, json_conf)
@@ -11723,10 +11740,10 @@ def lens_model_report(cam_id, con, cur, json_conf):
    #exit()
    #print("ENDED AFTER SUM")
    grid_bg = np.zeros((1080,1920,3),dtype=np.uint8)
-   autocal_dir = "/mnt/ams2/cal/"
+   autocal_dir = AMS_HOME + "/cal/"
    station_id = json_conf['site']['ams_id']
    mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
-   merged_star_file = "/mnt/ams2/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
+   merged_star_file = AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_MERGED_STARS.json"
 
    if os.path.exists(merged_star_file) is False:
       print("No star file :", cam_id)
@@ -11800,8 +11817,8 @@ def lens_model_report(cam_id, con, cur, json_conf):
 def fix_cal(cal_fn, con, cur,json_conf ):
    (f_datetime, cam_id, f_date_str,fy,fmin,fd, fh, fm, fs) = convert_filename_to_date_cam(cal_fn)
    if True:
-      mcp_file = "/mnt/ams2/cal/" + "multi_poly-" + station_id + "-" + cam_id + ".info"
-      anc_file = "/mnt/ams2/cal/" + station_id + "_" + cam_id + "_ANCHOR.json"
+      mcp_file = AMS_HOME + "/cal/" + "multi_poly-" + station_id + "-" + cam_id + ".info"
+      anc_file = AMS_HOME + "/cal/" + station_id + "_" + cam_id + "_ANCHOR.json"
       print(anc_file)
       if os.path.exists(mcp_file) == 1:
          mcp = load_json_file(mcp_file)
@@ -11817,7 +11834,7 @@ def fix_cal(cal_fn, con, cur,json_conf ):
          anc_data = load_json_file(anc_file)
 
    if "json" in cal_fn:
-      cal_dir = "/mnt/ams2/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
+      cal_dir = AMS_HOME + "/cal/freecal/" + cal_fn.replace("-stacked-calparams.json", "/")
    cal_params = load_json_file(cal_dir + cal_fn)
    cal_img = cv2.imread(cal_dir + cal_fn.replace("-calparams.json", ".png"))
    range_data = get_cal_range(cal_fn, cal_img, con, cur, json_conf)
@@ -11897,7 +11914,7 @@ def find_best_calibration(cal_fn, orig_cal, json_conf):
    station_id = json_conf['site']['ams_id']
    (f_datetime, cam_id, f_date_str,fy,fmin,fd, fh, fm, fs) = convert_filename_to_date_cam(cal_fn)
    # Not used...
-   cal_range_file = "/mnt/ams2/cal/" + "cal_day_hist.json"
+   cal_range_file = AMS_HOME + "/cal/cal_day_hist.json"
    list_of_cals = load_json_file(cal_range_file)
    last_best_res = 9999
    last_best_cal = None 
@@ -11939,8 +11956,8 @@ def find_best_calibration(cal_fn, orig_cal, json_conf):
 
 def prune(cam_id, con, cur, json_conf):
    #print("Prune calfiles for cam_id")
-   freecal_dir = "/mnt/ams2/cal/freecal/"
-   extracal_dir = "/mnt/ams2/cal/extracal/"
+   freecal_dir = AMS_HOME + "/cal/freecal/"
+   extracal_dir = AMS_HOME + "/cal/extracal/"
    if os.path.exists(extracal_dir) is False:
       os.path.exists(extracal_dir)
    temp = os.listdir(freecal_dir)
@@ -11949,7 +11966,7 @@ def prune(cam_id, con, cur, json_conf):
       if cam_id in xx:
          cal_files.append(xx)
 
-   freecal_index = load_json_file("/mnt/ams2/cal/freecal_index.json") 
+   freecal_index = load_json_file(AMS_HOME + "/cal/freecal_index.json") 
    month_dict = {}
    pruned = 0
    for cal_file in freecal_index:
@@ -12005,7 +12022,7 @@ def prune(cam_id, con, cur, json_conf):
 
 
 if __name__ == "__main__":
-
+   argv = sys.argv
    try:
       import PySimpleGUI as sg
    except:
@@ -12023,10 +12040,10 @@ if __name__ == "__main__":
 
    MOVIE_FRAMES_TEMP_FOLDER = "/home/ams/REFIT_METEOR_FRAMES_TEMP/"
 
-   if sys.argv[1] == "rm_corrupt_cal" : 
+   if argv[1] == "rm_corrupt_cal" : 
       rm_corrupt_cal()
 
-   if sys.argv[1] == "refit_meteor_day" : 
+   if argv[1] == "refit_meteor_day" : 
       SAVE_MOVIE = True
    else:
       SAVE_MOVIE = False 
@@ -12040,7 +12057,7 @@ if __name__ == "__main__":
       print("Ok to run!")
 
    running = check_running("recal.py ")
-   if running > 2 and sys.argv[1] != "refit_meteor":
+   if running > 2 and argv[1] != "refit_meteor":
       print("ALREADY RUNNING:", running)
       cmd = "echo " + str(running) + " >x"
       os.system(cmd)
@@ -12055,7 +12072,7 @@ if __name__ == "__main__":
          exit()
 
 
-   json_conf = load_json_file("../conf/as6.json")
+   json_conf = load_json_file(AMS_HOME + "/conf/as6.json")
    station_id = json_conf['site']['ams_id']
    db_file = station_id + "_CALIB.db" 
    #con = sqlite3.connect(":memory:")
@@ -12072,9 +12089,9 @@ if __name__ == "__main__":
    con = sqlite3.connect(db_file)
    cur = con.cursor()
 
-   cmd = sys.argv[1]
-   if len(sys.argv) > 2:
-      cal_file = sys.argv[2]
+   cmd = argv[1]
+   if len(argv) > 2:
+      cal_file = argv[2]
 
    # batch = batch load cal files in DB / v2 structure
    # gis = process 1 file for first time
@@ -12097,47 +12114,47 @@ if __name__ == "__main__":
    if cmd == "fix_lens_nans":
       fix_lens_nans()
 
-   if sys.argv[1] == "remote"  or sys.argv[1] == "remote_cal":
-      if len(sys.argv) == 2:
+   if argv[1] == "remote"  or argv[1] == "remote_cal":
+      if len(argv) == 2:
          remote_menu(con, cur)
       else:
-         cal_file = sys.argv[2]
+         cal_file = argv[2]
          remote_cal(cal_file, con, cur)
 
-   if sys.argv[1] == "rescue" :
-      cam_id = sys.argv[2]
+   if argv[1] == "rescue" :
+      cam_id = argv[2]
       rescue_cal(cam_id, con, cur, json_conf)
 
 
    if cmd == "anchor_cal" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       anchor_cal(cam_id, con, cur, json_conf)
 
    if cmd == "best" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       characterize_best(cam_id, con, cur, json_conf)
 
    if cmd == "batch" :
       # WORKS BUT OLD AND SLOW
       # USE status to get started and wiz to perfect!
 
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       batch_calib(cam_id, con, cur, json_conf)
    if cmd == "get_image_stars" or cmd == "gis":
       get_image_stars(cal_file, con, cur, json_conf)
    if cmd == "cal_main" :
       cal_main(cal_file)
    if cmd == "char" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       characterize_fov(cam_id, con, cur, json_conf)
       characterize_best(cam_id, con, cur, json_conf)
 
    if cmd == "fast_lens":
       force = 1
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       limit = 10 
-      if len(sys.argv) > 3:
-         limit = int(sys.argv[3])
+      if len(argv) > 3:
+         limit = int(argv[3])
 
       if cam_id == "all":
          for cam_num in json_conf['cameras']:
@@ -12151,8 +12168,8 @@ if __name__ == "__main__":
 
    if cmd == "lens_model" :
 
-      cam_id = sys.argv[2]
-      if len(sys.argv) > 3:
+      cam_id = argv[2]
+      if len(argv) > 3:
          force = True
       else:
          force = False 
@@ -12167,7 +12184,7 @@ if __name__ == "__main__":
 
 
    if cmd == "update" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       update_calfiles(cam_id, con, cur, json_conf)
    if cmd == "view" :
       view_calfile(cal_file, con, cur, json_conf)
@@ -12175,13 +12192,13 @@ if __name__ == "__main__":
       manual_tweek_calib(cal_file, con, cur, json_conf)
    if cmd == "reset_bad_cals" :
 
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       reset_bad_cals(cam_id, con, cur, json_conf)
 
    if cmd == "apply_calib" :
-      cf = sys.argv[2]
+      cf = argv[2]
       (f_datetime, cam_id, f_date_str,fy,fmin,fd, fh, fm, fs) = convert_filename_to_date_cam(cf)
-      autocal_dir = "/mnt/ams2/cal/"
+      autocal_dir = AMS_HOME + "/cal/"
       mcp_file = autocal_dir + "multi_poly-" + station_id + "-" + cam_id + ".info"
       if os.path.exists(mcp_file) == 1:
          mcp = load_json_file(mcp_file)
@@ -12193,12 +12210,13 @@ if __name__ == "__main__":
 
       calfiles_data = load_cal_files(cam_id, con, cur)
 
+      print("cf:", cf)
       last_cal_params = apply_calib(cf, calfiles_data, json_conf, mcp, None, "")
 
    if cmd == "batch_apply_bad" :
-      cam_id = sys.argv[2]
-      if len(sys.argv) > 3:
-         blimit = sys.argv[3] 
+      cam_id = argv[2]
+      if len(argv) > 3:
+         blimit = argv[3] 
       else:
          blimit = 25
 
@@ -12212,7 +12230,7 @@ if __name__ == "__main__":
       os.system("cd ../pythonv2; ./autoCal.py cal_index")
 
    if cmd == "batch_apply" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       if cam_id == "ALL" or cam_id == "all":
          for cam_num in json_conf['cameras']:
             cam_id = json_conf['cameras'][cam_num]['cams_id']
@@ -12221,29 +12239,29 @@ if __name__ == "__main__":
             batch_apply(cam_id, con, cur, json_conf, None, True)
 
       else:
-         if len(sys.argv) > 3:
+         if len(argv) > 3:
             # do bad
             batch_apply(cam_id, con, cur, json_conf, None, True)
          else:
             batch_apply(cam_id, con, cur, json_conf)
 
    if cmd == "cat_view" :
-      cal_fn = sys.argv[2]
+      cal_fn = argv[2]
       cat_view(cal_fn, con, cur, json_conf)
    if cmd == "find_stars_cat" :
-      cal_fn = sys.argv[2]
+      cal_fn = argv[2]
       find_stars_with_catalog(cal_fn, con, cur, json_conf)
    if cmd == "cat_image" :
-      cal_fn = sys.argv[2]
+      cal_fn = argv[2]
       catalog_image(cal_fn, con, cur, json_conf)
 
    if cmd == "batch_review" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       batch_review(station_id, cam_id, con, cur, json_conf)
    if cmd == "wiz" :
-      cam_id = sys.argv[2]
-      if len(sys.argv) > 3:
-         limit = int(sys.argv[3])
+      cam_id = argv[2]
+      if len(argv) > 3:
+         limit = int(argv[3])
       else:
          limit = 25
 
@@ -12257,7 +12275,7 @@ if __name__ == "__main__":
          wizard(station_id, cam_id, con, cur, json_conf, limit)
 
    if cmd == "status" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       print("CAM:", cam_id)
       if cam_id == "all":
          for cam_num in json_conf['cameras']:
@@ -12275,7 +12293,7 @@ if __name__ == "__main__":
 
 
    if cmd == "prune" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
 
       if cam_id == "all":
          for cam_num in json_conf['cameras']:
@@ -12284,7 +12302,7 @@ if __name__ == "__main__":
       else:
          prune(cam_id, con, cur, json_conf)
    if cmd == "lens_model_report" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       if cam_id == "all":
          for cam_num in json_conf['cameras']:
             cam_id = json_conf['cameras'][cam_num]['cams_id']
@@ -12292,15 +12310,15 @@ if __name__ == "__main__":
       else:
          lens_model_report(cam_id, con, cur, json_conf)
    if cmd == "run_astr":
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       run_astr(cam_id, json_conf, con, cur)
 
    if cmd == "make_plate":
-      cal_fn = sys.argv[2]
+      cal_fn = argv[2]
       plate_file, plate_img = make_plate(cal_fn, json_conf, con, cur)
       solve_field(plate_file, json_conf, con, cur)
    if cmd == "star_points":
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       if cam_id == "all":
          for cam_num in json_conf['cameras']:
             cam_id = json_conf['cameras'][cam_num]['cams_id']
@@ -12308,7 +12326,7 @@ if __name__ == "__main__":
       else:
          star_points_all(cam_id, json_conf, con, cur)
    if cmd == "star_points_report":
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       if cam_id == "all":
          for cam_num in json_conf['cameras']:
             cam_id = json_conf['cameras'][cam_num]['cams_id']
@@ -12318,38 +12336,38 @@ if __name__ == "__main__":
 
 
    if cmd == "star_track" :
-      cam_id = sys.argv[2]
-      date = sys.argv[3]
+      cam_id = argv[2]
+      date = argv[3]
       star_track(cam_id, date, con, cur, json_conf)
   
 
    if cmd == "fix_cal" :
-      cal_file = sys.argv[2]
+      cal_file = argv[2]
       fix_cal(cal_file, con, cur, json_conf)
 
 
    if cmd == "refit_meteor" :
-      meteor_file = sys.argv[2]
+      meteor_file = argv[2]
       refit_meteor(meteor_file, con, cur, json_conf)
 
    if cmd == "refit_meteor_year":
-      year = sys.argv[2]
-      files = os.listdir("/mnt/ams2/meteors/")
+      year = argv[2]
+      files = os.listdir(AMS_HOME + "/meteors/")
       for ff in sorted(files, reverse=True):
          if year not in ff:
             continue
-         if os.path.isdir("/mnt/ams2/meteors/" + ff + "/") is True :
+         if os.path.isdir(AMS_HOME + "/meteors/" + ff + "/") is True :
             print(ff)
-            print("/mnt/ams2/meteors/" + ff + "/refit_summary.log") 
-            if os.path.exists("/mnt/ams2/meteors/" + ff + "/refit_summary.log") is False:
+            print(AMS_HOME + "/meteors/" + ff + "/refit_summary.log") 
+            if os.path.exists(AMS_HOME + "/meteors/" + ff + "/refit_summary.log") is False:
                refit_meteor_day(ff, con, cur , json_conf)
                #print(cmd)
                #os.system(cmd)
             else:
                print("Did already.")
    if cmd == "refit_summary" :
-      date = sys.argv[2]
-      mdir = "/mnt/ams2/meteors/" + date + "/"
+      date = argv[2]
+      mdir = AMS_HOME + "/meteors/" + date + "/"
       refit_log_file = mdir + "refit.log"
       refit_sum_file = mdir + "refit_summary.log"
       if os.path.exists(refit_log_file) is True:
@@ -12359,14 +12377,14 @@ if __name__ == "__main__":
 
    if cmd == "recal" :
       # main recal routine 
-      recal_history_file = "/mnt/ams2/cal/recal.json" 
+      recal_history_file = AMS_HOME + "/cal/recal.json" 
       if os.path.exists(recal_history_file) is True:
          recal_hist = load_json_file(recal_history_file)
       else:
          recal_hist = {}
 
       os.system("touch pause-jobs.json")
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       force = 1
       if cam_id != "ALL" and cam_id != "all":
          limit = 25
@@ -12398,7 +12416,7 @@ if __name__ == "__main__":
       os.system("rm pause-jobs.json")
 
    if cmd == "perfect_cal" or cmd == "perfect":
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
 
       if cam_id != "ALL" and cam_id != "all":
          perfect_cal(cam_id, con, cur, json_conf)
@@ -12408,7 +12426,7 @@ if __name__ == "__main__":
             perfect_cal(cam_id, con, cur, json_conf)
 
    if cmd == "revert" :
-      cal_fn = sys.argv[2]
+      cal_fn = argv[2]
       revert_to_wcs(cal_fn)
 
    if cmd == "cal_index" :
@@ -12418,34 +12436,34 @@ if __name__ == "__main__":
       plot_cal_history(con, cur, json_conf)
 
    if cmd == "cal_plots" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       make_cal_plots(cam_id, json_conf)
       make_cal_summary(cam_id, json_conf)
 
    if cmd == "quality_check" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       quality_check_all_cal_files(cam_id, con, cur) 
 
    if cmd == "plot_refit_meteor_day":
-      meteor_day = sys.argv[2]
+      meteor_day = argv[2]
       plot_refit_meteor_day(meteor_day, con, cur, json_conf)
 
    if cmd == "cal_health" :
-      cal_health(con, cur, json_conf, sys.argv[2])
+      cal_health(con, cur, json_conf, argv[2])
    if cmd == "copy_best_cal_images" :
       copy_best_cal_images(con, cur, json_conf)
    if cmd == "retry_astrometry" :
-      cam_id = sys.argv[2]
+      cam_id = argv[2]
       retry_astrometry( cam_id)
 
    
    if cmd == "refit_meteor_day" :
-      date = sys.argv[2]
+      date = argv[2]
 
       refit_meteor_day(date, con, cur , json_conf)
       exit()
-      mdir = "/mnt/ams2/meteors/" + date + "/"
-      files = os.listdir("/mnt/ams2/meteors/" + date + "/")
+      mdir = AMS_HOME + "/meteors/" + date + "/"
+      files = os.listdir(AMS_HOME + "/meteors/" + date + "/")
       refit_log_file = mdir + "refit.log"
       if os.path.exists(refit_log_file) is True:
          refit_log = load_json_file(refit_log_file)
@@ -12564,3 +12582,4 @@ if __name__ == "__main__":
         # the function should end here and a new function for finding stars should be made
 
         return(thresholded_image, image)
+

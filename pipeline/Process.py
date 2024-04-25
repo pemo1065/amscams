@@ -30,6 +30,7 @@ from lib.PipeTimeLapse import make_tl_for_cam, video_from_images, six_cam_video,
 from lib.PipeMeteorDelete import delete_all_meteor_files
 from lib.PipeEvent import events_for_day, get_network_info, solve_day, dyna_events_for_day, dyna_events_for_month, delete_events_day 
 from lib.PipeSolve import simple_solve
+from lib.DEFAULTS import *
 
 #from RMS.GreatCircle import fitGC
 
@@ -39,7 +40,7 @@ from lib.PipeSolve import simple_solve
 
 '''
 
-AMS_HOME = "/home/ams/amscams"
+#AMS_HOME = "/home/ams/amscams"
 CONF_DIR = AMS_HOME + "/conf"
 DATA_BASE_DIR = "/mnt/ams2"
 PROC_BASE_DIR = "/mnt/ams2/SD/proc2"

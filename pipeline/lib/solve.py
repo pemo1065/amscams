@@ -1669,7 +1669,7 @@ def find_event(file, station_id, detect_info, events,solved_events):
    return(event_id, events)   
 
 def build_events(year):
-   json_conf = load_json_file("/home/ams/amscams/conf/as6.json")
+   json_conf = load_json_file("/ams/amscams/conf/as6.json")
    station = json_conf['site']['ams_id']
    print("<h1>Multi-station detections for ", station, "</h1>")
    detect_file = "/mnt/ams2/meteor_archive/" + station + "/DETECTS/ms_detects.json"
