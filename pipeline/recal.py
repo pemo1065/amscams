@@ -12023,11 +12023,11 @@ def prune(cam_id, con, cur, json_conf):
 
 if __name__ == "__main__":
    argv = sys.argv
-   try:
-      import PySimpleGUI as sg
-   except:
-      print("Missing lib:")
-      print("sudo python3 -m pip install PySimpleGUI")
+   #try:
+   #   import PySimpleGUI as sg
+   #except:
+   #   print("Missing lib:")
+   #   print("sudo python3 -m pip install PySimpleGUI")
 
 
 
